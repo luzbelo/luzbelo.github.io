@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <title>AirBNB Manager</title>
+	<style>
+		div.left { width:60%; float:left; }
+		div.right { width:40%; float:left; }
+		button.main { display: block; width: 100%; border: solid 4px; background-color: #305496; color: white; padding: 5px 28px; font-size: 15px; cursor: pointer; text-align: center; }
+		#imageDisplayed {margin: auto; }
+	        body { padding: 2%; }
+		.box { box-sizing: content-box; width: 95vw; border: solid 2px black; margin: 0.2%; padding: 0.5%; }
+		@media only screen and (max-width: 600px) {
+			.half-divider { display: flex; flex-direction: column; justify-content: center; align-items: center; }
+			#photoView { flex: 1 1 110%; }
+			#photoView,
+			img { max-width: 100%; }
+		}
+		@media only screen and (min-width: 600px) {
+			.half-divider { display: flex; flex-direction: column; justify-content: space-between; align-items: center; }
+			#photoView { flex: 1 1 110%; align-items: center; }
+			#photoView,
+			img { display: block; max-width: 100%; }
+		}
+	</style>
+</head>
+<body>
+    <h1>AirBNB Manager</h1>
+    <div class="half-divider">
+        <section id="options" class="box">
+			<div class="left">
+				<label for="languageDrop">Language:</label>
+				<select id="languageDrop" name="languageDrop" onchange="updatePhotos()">
+					<option value="SP">Spanish</option>
+					<option value="EN">English</option>
+				</select>
+				<br><br>
+				<label for="departmentDrop">Department:</label>
+				<select id="departmentDrop" name="departmentDrop" onchange="updatePhotos()">
+					<option value="Prado">Prado</option>
+					<option value="Beijin">Beijin</option>
+					<option value="Equipetrol">Equipetrol</option>
+				</select>
+				<br><br>
+				<label for="photoDrop">Photos:</label>
+				<select id="photoDrop" name="photoDrop" onchange="updatePhotoView()"></select>
+			</div>
+			<div class="right">
+				<button id="copyAirBNB" onclick="airBNBToClipboard()" class="main">AirBNB</button>
+				<button id="copyImage" onclick="imageToClipboard()" class="main">Image</button>
+				<button id="copyText" onclick="textToClipboard()" class="main">Text</button>
+			</div>			
+		</section>
+        <section id="messageText" class="box"></section>
+        <section id="photoView" class="box"></section>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+		$(document).ready(() => {updatePhotos();}); //run on document load
+		//MSG Spanish Prado, Beijin y Equipenorte  ;  English Prado, Beijin y Equipenorte
+		const k_messages = [];
+		k_messages[0] = "Hola, somos Renato y Maria de AirBNB, hemos creado este grupo para mantener una comunicación más fluida.<br>- La imagen enviada tiene las instrucciones, estaremos atentos a cualquier duda<br>- Envíanos fotos de los documentos (anverso y reverso) de todos los huéspedes<br>- Cual es el horario estimado de Check IN?<br>*Ubicación*: https://bit.ly/TorreSol      ";
+		k_messages[1] = "Hola, somos Renato y Maria de AirBNB, hemos creado este grupo para mantener una comunicación más fluida.<br>- La imagen enviada tiene las instrucciones, estaremos atentos a cualquier duda<br>- Envíanos fotos de los documentos (anverso y reverso) de todos los huéspedes<br>- Cual es el horario estimado de Check IN?<br>*Ubicación*: https://bit.ly/cochabeiging  ";
+		k_messages[2] = "Hola, somos Renato y Maria de AirBNB, hemos creado este grupo para mantener una comunicación más fluida.<br>- La imagen enviada tiene las instrucciones, estaremos atentos a cualquier duda<br>- Envíanos fotos de los documentos (anverso y reverso) de todos los huéspedes<br>- Cual es el horario estimado de Check IN?<br>*Ubicación*: https://bit.ly/SczEquipeNorte";
+		k_messages[3] = "Hi, this is Renato and Maria from AirBNB, we have created the group in order to keep a fluent communication.<br>- Below is a image with the guidelines, in case any concern, let us know<br>- Share a picture of the documents (both sides) of all guests<br>- What is your estimated Check IN time?<br>Important information:<br>- *Location*: https://bit.ly/TorreSol      <br>- *WIFI*: Blanco *PASSWORD*: Huesped123$";
+		k_messages[4] = "Hi, this is Renato and Maria from AirBNB, we have created the group in order to keep a fluent communication.<br>- Below is a image with the guidelines, in case any concern, let us know<br>- Share a picture of the documents (both sides) of all guests<br>- What is your estimated Check IN time?<br>Important information:<br>- *Location*: https://bit.ly/cochabeiging  <br>- *WIFI*: Blanco *PASSWORD*: Huesped123$<br>- *Box key*: 2051";
+		k_messages[5] = "Hi, this is Renato and Maria from AirBNB, we have created the group in order to keep a fluent communication.<br>- Below is a image with the guidelines, in case any concern, let us know<br>- Share a picture of the documents (both sides) of all guests<br>- What is your estimated Check IN time?<br>Important information:<br>- *Location*: https://bit.ly/SczEquipeNorte<br>- *WIFI*: Blanco *PASSWORD*: Huesped123$";
+		const k_airBNB = [];
+		k_airBNB[0] = "https://www.airbnb.com/h/blancoprado";
+		k_airBNB[1] = "https://www.airbnb.com/h/blancobeiging";
+		k_airBNB[2] = "https://www.airbnb.com/h/santaequinorte";
+        const images = [
+            "BE1ChkIn.jpg", "BE2ChkOut.jpg",
+            "BS1ChkIn.jpg", "BS2ChkOut.jpg",
+            "EE1ChkIn.jpg", "EE2ChkOut.jpg", "EE3Lavado.jpg",
+            "ES1ChkIn.jpg", "ES2ChkOut.jpg", "ES3Lavado.jpg",
+            "PE1ChkIn.jpg", "PE2ChkOut.jpg", "PE3Lavado.jpg", "PE4Calefon.jpg", "PE5Jacuzzi.jpg",
+            "PS1ChkIn.jpg", "PS2ChkOut.jpg", "PS3Lavado.jpg", "PS4Calefon.jpg", "PS5Jacuzzi.jpg" ];
+        // A function that updates the photos displayed.
+        function updatePhotos() {
+            let language = document.getElementById("languageDrop").value;
+            let department = document.getElementById("departmentDrop").value;
+            let viewedImages = [];
+            viewedImages = imagesGet(language, department);
+            // load viewedImages into photosLoad as options
+            let photosLoad = document.getElementById("photoDrop");
+            photosLoad.innerHTML = "";
+            for (let i = 0; i < viewedImages.length; i++) {
+                let option = document.createElement("option");
+                option.value = viewedImages[i];
+                option.text = viewedImages[i];
+                photosLoad.appendChild(option);
+            }
+            updatePhotoView();
+			updateMessage();
+        }
+        // Retrieves an array of images based on the selected language and department.
+        // Parameters:
+        // - language: The selected language as a string.
+        // - department: The selected department as a string.
+        // Returns: An array of images that match the selected language and department.
+        function imagesGet(language, department) {
+            let result = [];
+            images.forEach((image) => {
+                if (image[0] == department[0] && image[1] == language[0]) {
+                    result.push(image);
+                }
+            })
+            return result;
+        }
+        // A function that updates the photos displayed.
+        function updatePhotoView() {
+            let image = document.getElementById("photoDrop").value;
+            let photoView = document.getElementById("photoView");
+            photoView.innerHTML = "";
+            let photo = document.createElement("img");
+            photo.id = "imageDisplayed";
+            photo.src = image;
+            photoView.appendChild(photo);
+        }
+        function updateMessage() {
+            let language = document.getElementById("languageDrop").selectedIndex;
+            let department = document.getElementById("departmentDrop").selectedIndex;
+            document.getElementById("messageText").innerHTML = k_messages[department+3*(language-1)+3];
+        }
+        async function imageToClipboard() {
+            try {
+                const imageElement = document.getElementById('imageDisplayed');
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                // Set canvas dimensions to match the image
+                canvas.width = imageElement.naturalWidth;
+                canvas.height = imageElement.naturalHeight;
+                // Draw the image onto the canvas
+                context.drawImage(imageElement, 0, 0, canvas.width, canvas.height);
+                // Convert the canvas content to a blob
+                canvas.toBlob(async (blob) => {
+                    const clipboardItemInput = new ClipboardItem({ 'image/png': blob });
+                    await navigator.clipboard.write([clipboardItemInput]);
+                    //alert('Image copied to clipboard!');
+                }, 'image/png');
+            } catch (err) {
+                console.error('Failed to copy image: ', err);
+                alert('Failed to copy image.');
+            }
+        }
+        function textToClipboard() {
+			let text = document.getElementById('messageText').innerHTML.replaceAll("<br>", "\r\n");
+			text = text.replaceAll("&nbsp;", " ");
+			text = text.replaceAll("&amp;", "&");
+			//text = text.replaceAll("&quot;", "\");
+			text = text.replaceAll("&lt;", "<");
+			text = text.replaceAll("&gt;", ">");
+			navigator.clipboard.writeText(text);
+			//alert("Text Copied");
+		}
+        function airBNBToClipboard() {
+            let department = document.getElementById("departmentDrop").selectedIndex;
+            let text = k_airBNB[department];
+			navigator.clipboard.writeText(text);
+			//alert("AirBNB URL Copied");
+		}
+    </script>
+</body>
+</html>
