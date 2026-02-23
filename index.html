@@ -1,170 +1,190 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <title>AirBNB Manager</title>
-	<style>
-		div.left { width:60%; float:left; }
-		div.right { width:40%; float:left; }
-		button.main { display: block; width: 100%; border: solid 4px; background-color: #305496; color: white; padding: 5px 28px; font-size: 15px; cursor: pointer; text-align: center; }
-		#imageDisplayed {margin: auto; }
-	        body { padding: 2%; }
-		.box { box-sizing: content-box; width: 95vw; border: solid 2px black; margin: 0.2%; padding: 0.5%; }
-		@media only screen and (max-width: 600px) {
-			.half-divider { display: flex; flex-direction: column; justify-content: center; align-items: center; }
-			#photoView { flex: 1 1 110%; }
-			#photoView,
-			img { max-width: 100%; }
-		}
-		@media only screen and (min-width: 600px) {
-			.half-divider { display: flex; flex-direction: column; justify-content: space-between; align-items: center; }
-			#photoView { flex: 1 1 110%; align-items: center; }
-			#photoView,
-			img { display: block; max-width: 100%; }
-		}
-	</style>
+  <meta charset="UTF-8">
+  <title>Cotizacion AirBNB</title>
+  <style>
+  body {font-family: Arial, sans-serif;
+        margin: 5px;
+        background: #f5f5f5;}
+  .form-container {background: white;
+                   padding: 5px;
+                  border-radius: 8px;
+                  max-width: 500px;
+                  box-shadow: 0 2px 6px rgba(0,0,0,0.2);}
+  .form-row {display: flex;
+             align-items: center;
+             margin-bottom: 5px;}
+  .form-row label {width: 170px;}
+  .form-row input,
+  .form-row select,
+  .form-row textarea {flex: 1;
+                      padding: 3px;
+                      border: 1px solid #ccc;
+                      border-radius: 4px;}
+  input[readonly], textarea[readonly] {background-color: #e9ecef;
+                                       border: 1px dashed #999;
+                                       font-weight: bold;
+                                       cursor: not-allowed;}
+  textarea {resize: vertical;}
+  button {margin-top: 15px;
+          padding: 10px 15px;
+          border: none;
+          background: #007bff;
+          color: white;
+          border-radius: 4px;
+          cursor: pointer;
+          width: 100%;}
+  button:hover {background: #0056b3;}
+  </style>
 </head>
 <body>
-    <h1>AirBNB Manager</h1>
-    <div class="half-divider">
-        <section id="options" class="box">
-			<div class="left">
-				<label for="languageDrop">Language:</label>
-				<select id="languageDrop" name="languageDrop" onchange="updatePhotos()">
-					<option value="SP">Spanish</option>
-					<option value="EN">English</option>
-				</select>
-				<br><br>
-				<label for="departmentDrop">Department:</label>
-				<select id="departmentDrop" name="departmentDrop" onchange="updatePhotos()">
-					<option value="Prado">Prado</option>
-					<option value="Beijin">Beijin</option>
-					<option value="Equipetrol">Equipetrol</option>
-				</select>
-				<br><br>
-				<label for="photoDrop">Photos:</label>
-				<select id="photoDrop" name="photoDrop" onchange="updatePhotoView()"></select>
-			</div>
-			<div class="right">
-				<button id="copyAirBNB" onclick="airBNBToClipboard()" class="main">AirBNB</button>
-				<button id="copyImage" onclick="imageToClipboard()" class="main">Image</button>
-				<button id="copyText" onclick="textToClipboard()" class="main">Text</button>
-			</div>			
-		</section>
-        <section id="messageText" class="box"></section>
-        <section id="photoView" class="box"></section>
+<div class="form-container">
+  <form id="formReserva">
+    <div class="form-row">
+      <label>Ubicación</label>
+      <select id="ubicacion" onchange="actualizarDatos()">
+      <option value="Prado" selected>Prado</option>
+      <option value="Beijin">Beijin</option>
+      <option value="Equipe">Equipe</option>
+      <option value="Millenial">Millenial</option>
+      </select>
     </div>
+    <div class="form-row"><label>USD/noche sugerido </label><input type="number" id="precioSugerido" readonly>                                  </div>
+    <div class="form-row"><label>Huéspedes incluidos</label><input type="number" id="huespedesIncluidos" readonly>                              </div>
+    <div class="form-row"><label>USD Huésped add    </label><input type="number" id="huespedAdicional" readonly>                                </div>
+    <div class="form-row"><label>Check IN           </label><input type="date"   id="checkin" onchange="calcularTotal()">                       </div>
+    <div class="form-row"><label>Check OUT          </label><input type="date"   id="checkout" onchange="calcularTotal()">                      </div>
+    <div class="form-row"><label>Huéspedes solicitud</label><input type="number" id="huespedes" min="1" onchange="calcularTotal()">             </div>
+    <div class="form-row"><label>USD/noche          </label><input type="number" id="precio" step="0.01" onchange="calcularTotal()">            </div>
+    <div class="form-row"><label>Descuento USD  (%) </label><input type="number" id="desc_usd" value="15" onchange="calcularTotal()">           </div>
+    <div class="form-row"><label>Descuento USDT (%) </label><input type="number" id="desc_usdt" value="12" onchange="calcularTotal()">          </div>
+    <div class="form-row"><label>Descuento BOB  (%) </label><input type="number" id="desc_bob" value="10" onchange="calcularTotal()">           </div>
+    <div class="form-row"><label>Exchange Rate      </label><input type="number" id="exchange" value="9" step="0.1" onchange="calcularTotal()"> </div>
+    <div class="form-row"><label>Limpiezas regalo   </label><input type="number" id="limpiezas" value="0" step="1" onchange="calcularTotal()">  </div>
+    <div class="form-row"><label>USD Total          </label><input type="number" id="total" readonly>                                           </div>
+    <div class="form-row"><label>WhatsApp           </label><textarea id="msgWhatsapp" rows="12" readonly></textarea>                           </div>
+    <button type="submit">Copiar Mensaje</button>
+  </form>
+</div>
+<script>
+const datosUbicacion = {
+  "Prado":     { precio: 49, huespedes: 4, adicional: 11 },
+  "Equipe":    { precio: 33, huespedes: 2, adicional: 8 },
+  "Millenial": { precio: 34, huespedes: 2, adicional: 8 },
+  "Beijin":    { precio: 21, huespedes: 3, adicional: 8 }
+};
+// ===== FECHAS SIN ERROR DE ZONA =====
+function hoyISO(fecha) {
+  const año = fecha.getFullYear();
+  const mes = String(fecha.getMonth() + 1).padStart(2, "0");
+  const dia = String(fecha.getDate()).padStart(2, "0");
+  return `${año}-${mes}-${dia}`;
+}
+function crearFechaLocal(fechaStr) {
+  const p = fechaStr.split("-");
+  return new Date(p[0], p[1] - 1, p[2]);
+}
+function diasEntre(f1, f2) {
+  if (!f1 || !f2) return 0;
+  const d1 = crearFechaLocal(f1);
+  const d2 = crearFechaLocal(f2);
+  const diff = (d2 - d1) / (1000 * 60 * 60 * 24);
+  return diff > 0 ? diff : 0;
+}
+function formatearFecha(fechaStr) {
+  if (!fechaStr) return "";
+  const meses = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+  const fecha = crearFechaLocal(fechaStr);
+  return fecha.getDate() + "/" + meses[fecha.getMonth()];
+}
+// ===== LOGICA PRINCIPAL =====
+function actualizarDatos() {
+  const ubicacion = document.getElementById("ubicacion").value;
+  const datos = datosUbicacion[ubicacion];
+  document.getElementById("precioSugerido").value = datos.precio;
+  document.getElementById("huespedesIncluidos").value = datos.huespedes;
+  document.getElementById("huespedAdicional").value = datos.adicional;
+  document.getElementById("huespedes").value = datos.huespedes;
+  document.getElementById("precio").value = datos.precio;
+  calcularTotal();
+}
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <script>
-		$(document).ready(() => {updatePhotos();}); //run on document load
-		//MSG Spanish Prado, Beijin y Equipenorte  ;  English Prado, Beijin y Equipenorte
-		const k_messages = [];
-		k_messages[0] = "Hola, somos Renato y Maria de AirBNB, hemos creado este grupo para mantener una comunicación más fluida.<br>- La imagen enviada tiene las instrucciones, estaremos atentos a cualquier duda<br>- Envíanos fotos de los documentos (anverso y reverso) de todos los huéspedes<br>- Cual es el horario estimado de Check IN?<br>*Ubicación*: https://bit.ly/TorreSol      ";
-		k_messages[1] = "Hola, somos Renato y Maria de AirBNB, hemos creado este grupo para mantener una comunicación más fluida.<br>- La imagen enviada tiene las instrucciones, estaremos atentos a cualquier duda<br>- Envíanos fotos de los documentos (anverso y reverso) de todos los huéspedes<br>- Cual es el horario estimado de Check IN?<br>*Ubicación*: https://bit.ly/cochabeiging  ";
-		k_messages[2] = "Hola, somos Renato y Maria de AirBNB, hemos creado este grupo para mantener una comunicación más fluida.<br>- La imagen enviada tiene las instrucciones, estaremos atentos a cualquier duda<br>- Envíanos fotos de los documentos (anverso y reverso) de todos los huéspedes<br>- Cual es el horario estimado de Check IN?<br>*Ubicación*: https://bit.ly/SczEquipeNorte";
-		k_messages[3] = "Hi, this is Renato and Maria from AirBNB, we have created the group in order to keep a fluent communication.<br>- Below is a image with the guidelines, in case any concern, let us know<br>- Share a picture of the documents (both sides) of all guests<br>- What is your estimated Check IN time?<br>Important information:<br>- *Location*: https://bit.ly/TorreSol      <br>- *WIFI*: Blanco *PASSWORD*: Huesped123$";
-		k_messages[4] = "Hi, this is Renato and Maria from AirBNB, we have created the group in order to keep a fluent communication.<br>- Below is a image with the guidelines, in case any concern, let us know<br>- Share a picture of the documents (both sides) of all guests<br>- What is your estimated Check IN time?<br>Important information:<br>- *Location*: https://bit.ly/cochabeiging  <br>- *WIFI*: Blanco *PASSWORD*: Huesped123$<br>- *Box key*: 2051";
-		k_messages[5] = "Hi, this is Renato and Maria from AirBNB, we have created the group in order to keep a fluent communication.<br>- Below is a image with the guidelines, in case any concern, let us know<br>- Share a picture of the documents (both sides) of all guests<br>- What is your estimated Check IN time?<br>Important information:<br>- *Location*: https://bit.ly/SczEquipeNorte<br>- *WIFI*: Blanco *PASSWORD*: Huesped123$";
-		const k_airBNB = [];
-		k_airBNB[0] = "https://www.airbnb.com/h/blancoprado";
-		k_airBNB[1] = "https://www.airbnb.com/h/blancobeiging";
-		k_airBNB[2] = "https://www.airbnb.com/h/santaequinorte";
-        const images = [
-            "BE1ChkIn.jpg", "BE2ChkOut.jpg",
-            "BS1ChkIn.jpg", "BS2ChkOut.jpg",
-            "EE1ChkIn.jpg", "EE2ChkOut.jpg", "EE3Lavado.jpg",
-            "ES1ChkIn.jpg", "ES2ChkOut.jpg", "ES3Lavado.jpg",
-            "PE1ChkIn.jpg", "PE2ChkOut.jpg", "PE3Lavado.jpg", "PE4Calefon.jpg", "PE5Jacuzzi.jpg",
-            "PS1ChkIn.jpg", "PS2ChkOut.jpg", "PS3Lavado.jpg", "PS4Calefon.jpg", "PS5Jacuzzi.jpg" ];
-        // A function that updates the photos displayed.
-        function updatePhotos() {
-            let language = document.getElementById("languageDrop").value;
-            let department = document.getElementById("departmentDrop").value;
-            let viewedImages = [];
-            viewedImages = imagesGet(language, department);
-            // load viewedImages into photosLoad as options
-            let photosLoad = document.getElementById("photoDrop");
-            photosLoad.innerHTML = "";
-            for (let i = 0; i < viewedImages.length; i++) {
-                let option = document.createElement("option");
-                option.value = viewedImages[i];
-                option.text = viewedImages[i];
-                photosLoad.appendChild(option);
-            }
-            updatePhotoView();
-			updateMessage();
-        }
-        // Retrieves an array of images based on the selected language and department.
-        // Parameters:
-        // - language: The selected language as a string.
-        // - department: The selected department as a string.
-        // Returns: An array of images that match the selected language and department.
-        function imagesGet(language, department) {
-            let result = [];
-            images.forEach((image) => {
-                if (image[0] == department[0] && image[1] == language[0]) {
-                    result.push(image);
-                }
-            })
-            return result;
-        }
-        // A function that updates the photos displayed.
-        function updatePhotoView() {
-            let image = document.getElementById("photoDrop").value;
-            let photoView = document.getElementById("photoView");
-            photoView.innerHTML = "";
-            let photo = document.createElement("img");
-            photo.id = "imageDisplayed";
-            photo.src = image;
-            photoView.appendChild(photo);
-        }
-        function updateMessage() {
-            let language = document.getElementById("languageDrop").selectedIndex;
-            let department = document.getElementById("departmentDrop").selectedIndex;
-            document.getElementById("messageText").innerHTML = k_messages[department+3*(language-1)+3];
-        }
-        async function imageToClipboard() {
-            try {
-                const imageElement = document.getElementById('imageDisplayed');
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-                // Set canvas dimensions to match the image
-                canvas.width = imageElement.naturalWidth;
-                canvas.height = imageElement.naturalHeight;
-                // Draw the image onto the canvas
-                context.drawImage(imageElement, 0, 0, canvas.width, canvas.height);
-                // Convert the canvas content to a blob
-                canvas.toBlob(async (blob) => {
-                    const clipboardItemInput = new ClipboardItem({ 'image/png': blob });
-                    await navigator.clipboard.write([clipboardItemInput]);
-                    //alert('Image copied to clipboard!');
-                }, 'image/png');
-            } catch (err) {
-                console.error('Failed to copy image: ', err);
-                alert('Failed to copy image.');
-            }
-        }
-        function textToClipboard() {
-			let text = document.getElementById('messageText').innerHTML.replaceAll("<br>", "\r\n");
-			text = text.replaceAll("&nbsp;", " ");
-			text = text.replaceAll("&amp;", "&");
-			//text = text.replaceAll("&quot;", "\");
-			text = text.replaceAll("&lt;", "<");
-			text = text.replaceAll("&gt;", ">");
-			navigator.clipboard.writeText(text);
-			//alert("Text Copied");
-		}
-        function airBNBToClipboard() {
-            let department = document.getElementById("departmentDrop").selectedIndex;
-            let text = k_airBNB[department];
-			navigator.clipboard.writeText(text);
-			//alert("AirBNB URL Copied");
-		}
-    </script>
+function calcularTotal() {
+  const ubicacion = document.getElementById("ubicacion").value;
+  const checkin = document.getElementById("checkin").value;
+  const checkout = document.getElementById("checkout").value;
+  const huespedes = Number(document.getElementById("huespedes").value);
+  const precio = Number(document.getElementById("precio").value);
+  const incluidos = Number(document.getElementById("huespedesIncluidos").value);
+  const adicional = Number(document.getElementById("huespedAdicional").value);
+  const descUSD = Number(document.getElementById("desc_usd").value);
+  const descUSDT = Number(document.getElementById("desc_usdt").value);
+  const descBOB = Number(document.getElementById("desc_bob").value);
+  const exchange = Number(document.getElementById("exchange").value);
+  const limpiezas = Number(document.getElementById("limpiezas").value);
+  const noches = diasEntre(checkin, checkout);
+  let precioNocheFinal = precio;
+  if (huespedes > incluidos) {
+    precioNocheFinal = precio + (huespedes - incluidos) * adicional;
+  }
+  const total = noches * precioNocheFinal;
+  document.getElementById("total").value = total.toFixed(2);
+  const usdFinal = total * (1 - descUSD / 100);
+  const usdtFinal = total * (1 - descUSDT / 100);
+  const bobFinal = total * (1 - descBOB / 100) * exchange;
+  let plus = "";
+  if (limpiezas > 0) {
+    plus = `
+✨*Plus adicional*✨
+- Servicios de limpieza: ${limpiezas}
+- Cambio de sabanas: ${limpiezas}
+- Cambio de toallas: ${limpiezas}`;
+  }
+  const mensaje =
+`✨*Detalle de reserva: ${ubicacion.toUpperCase()}*✨
+- Huespedes: ${huespedes}
+- Del ${formatearFecha(checkin)} al ${formatearFecha(checkout)}: *${noches} noches*
+- Precio x noche: *${precioNocheFinal} $us*
+- ${noches} x ${precioNocheFinal} = *${total.toFixed(0)} $us (Sin descuento)*👈🏽
+
+✨*Formas de pago*✨
+- 🇺🇸*_${usdFinal.toFixed(0)} $us_* (Efectivo, Zelle) *${descUSD}% Menos*
+- 🇺🇸*_${usdtFinal.toFixed(0)} USDT_* (Binance) *${descUSDT}% Menos*
+- 🇧🇴*_${bobFinal.toFixed(0)} Bs_* (QR) *${descBOB}% Menos*
+- Tasa cambio *${exchange}* (Paralelo esta ${exchange + 0.5})`
++ plus;
+  document.getElementById("msgWhatsapp").value = mensaje;
+}
+
+function inicializarFechas() {
+  const hoy = new Date();
+  const salida = new Date();
+  salida.setDate(hoy.getDate() + 2);
+  document.getElementById("checkin").value = hoyISO(hoy);
+  document.getElementById("checkout").value = hoyISO(salida);
+}
+
+window.onload = function() {
+  inicializarFechas();
+  actualizarDatos();
+  calcularTotal();
+};
+// ===== COPIAR AL CLIPBOARD =====
+document.getElementById("formReserva").addEventListener("submit", function(e) {
+  e.preventDefault();
+  const texto = document.getElementById("msgWhatsapp").value;
+  navigator.clipboard.writeText(texto)
+    .then(() => alert("Mensaje copiado al portapapeles ✅"))
+    .catch(() => alert("Error al copiar"));
+});
+// ===== BLOQUEAR ENTER =====
+document.getElementById("formReserva").addEventListener("keydown", function(e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+  }
+});
+</script>
+
 </body>
 </html>
